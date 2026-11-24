@@ -4,10 +4,11 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CS2 Major – Live Overlay</title>
 <style>
-:root{--accent:#ffad32;--panel:rgba(15,18,25,.96);--ink:#f6f7fa;--muted:#a9b0bd;color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;background:transparent;overflow:hidden;color:var(--ink);font-family:Arial,Helvetica,sans-serif}main{width:min(100%,1050px);padding:12px;margin:0 auto}header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 3px 8px;font-size:12px;font-weight:800;letter-spacing:1.5px;text-shadow:0 1px 4px #000}header span:first-child{color:var(--accent)}#state{color:var(--muted);text-align:right}.matches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.match{background:var(--panel);border:1px solid #343944;border-top:3px solid var(--accent);border-radius:8px;padding:12px 13px 10px;min-width:0}.meta,.bottom{display:flex;justify-content:space-between;align-items:center;gap:6px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.65px}.live{color:#ff6568}.upcoming{color:var(--accent)}.scoreboard{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;padding:15px 0 12px}.team{display:flex;flex-direction:column;align-items:center;min-width:0;gap:7px}.logo{width:48px;height:48px;object-fit:contain;display:grid;place-items:center;font-size:21px;font-weight:900;color:var(--muted)}.name{font-size:15px;line-height:1.2;font-weight:800;text-align:center;overflow-wrap:anywhere}.scores{text-align:center;font-size:38px;font-weight:900;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;white-space:nowrap}.scorelabel{font-size:10px;letter-spacing:1px;color:var(--muted);font-weight:700;text-align:center;margin-top:4px}.bottom{border-top:1px solid #353944;padding-top:9px;letter-spacing:0}.empty{grid-column:1/-1;background:var(--panel);padding:20px;border-radius:8px;color:var(--muted);text-align:center;font-size:15px}footer{text-align:right;color:#d0d3da;text-shadow:0 1px 4px #000;font-size:10px;margin-top:6px}#debug{display:none;white-space:pre-wrap;word-break:break-all;font:12px monospace;background:#141720;padding:12px;max-height:400px;overflow:auto}body.debug #debug{display:block}body.vertical .matches{grid-template-columns:1fr}body.vertical main{max-width:550px}@media(max-width:600px){.matches{grid-template-columns:1fr}} 
+:root{color-scheme:dark;--panel:rgba(16,18,22,.96);--ink:#fff;--muted:#a7abb2}
+*{box-sizing:border-box}html,body{margin:0;background:transparent;color:var(--ink);font-family:Arial,Helvetica,sans-serif}main{width:min(100%,1050px);padding:6px;margin:0 auto}.matches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.match{background:var(--panel);border-radius:5px;min-width:0;padding:10px 14px 8px}.scoreboard{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}.team{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}.team:last-child{flex-direction:row-reverse;justify-content:flex-end}.logo{width:30px;height:30px;object-fit:contain;flex:0 0 30px;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted)}.name{font-size:14px;line-height:1.15;font-weight:700;overflow-wrap:anywhere;min-width:0}.scores{font-size:30px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:center}.map{color:var(--muted);font-size:11px;text-align:center;margin-top:5px;line-height:1.2}.empty{grid-column:1/-1;background:var(--panel);padding:12px;border-radius:5px;color:var(--muted);text-align:center;font-size:13px}footer{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px;font-size:9px;color:#ccc;text-shadow:0 1px 3px #000}#state{color:#ffcb80}#state:empty{display:none}footer span:last-child{margin-left:auto}body.vertical .matches{grid-template-columns:1fr}body.vertical main{max-width:550px}@media(max-width:650px){.matches{grid-template-columns:1fr}}@media(max-width:320px){.match{padding:8px}.scoreboard{gap:5px}.team{gap:4px}.logo{width:23px;height:23px;flex-basis:23px}.name{font-size:12px}.scores{font-size:24px}}
 </style>
 </head>
-<body><main><header><span id="title">PGL MAJOR SINGAPORE 2026</span><span id="state" role="status">VERBINDE …</span></header><section class="matches" id="matches" aria-label="Matches"></section><pre id="debug"></pre></main>
+<body><main><section class="matches" id="matches" aria-label="PGL Major Singapore 2026 – Live-Matches"></section><footer><span id="state" role="status">Verbinde …</span><span>Daten: esport.vision</span></footer></main>
 <script>
 'use strict';
 const API = 'https://cs2-major-api.zerpihd.workers.dev/matches';
@@ -19,7 +20,7 @@ function team(t) {
   const box = node('div','','team');
   const fallback = node('div',t.name.slice(0,3).toUpperCase(),'logo');
   box.append(fallback);
-  if (t.logo) {try {const url=new URL(t.logo);if(url.origin==='https://esport.vision'){const img=document.createElement('img');img.className='logo';img.alt='';img.onload=()=>fallback.replaceWith(img);img.src=url.href;}} catch {}}
+  if (t.logo) {try {const url=new URL(t.logo.replace(/&amp;/g,'&'));if(url.origin==='https://esport.vision'){const img=document.createElement('img');img.className='logo';img.alt='';img.onload=()=>fallback.replaceWith(img);img.src=url.href;}} catch {}}
   box.append(node('div',t.name,'name'));return box;
 }
 let lastGood=0, lastMatches=[];
@@ -27,14 +28,13 @@ function render(matches) {
   const list=$('matches');list.replaceChildren();
   if (!matches.length) { list.append(node('div','Momentan kein Major-Match live.','empty'));return; }
   for (const m of matches.slice(0,2)) {
-    const card=node('article','','match');const meta=node('div','','meta');
-    const hasRounds=Array.isArray(m.rounds)&&m.rounds.every(Number.isInteger);
-    meta.append(node('span',hasRounds?'● LIVE':'● MATCH LIVE','live'),node('span',m.map||'MAP OFFEN'));
-    const board=node('div','','scoreboard'), middle=node('div','');
-    middle.append(node('div',fmt(m.rounds),'scores'),node('div',hasRounds?'RUNDEN':'RUNDENSCORE OFFEN','scorelabel'));
-    board.append(team(m.teams[0]),middle,team(m.teams[1]));
-    const bottom=node('div','','bottom');bottom.append(node('span',m.map||'MAP OFFEN'),node('span','Maps '+fmt(m.series)));
-    card.append(meta,board,bottom);list.append(card);
+    const card=node('article','','match');
+    const board=node('div','','scoreboard');
+    board.append(team(m.teams[0]),node('div',fmt(m.rounds),'scores'),team(m.teams[1]));
+    const hasRounds=Array.isArray(m.rounds)&&m.rounds.length===2&&m.rounds.every(Number.isInteger);
+    const hasSeries=Array.isArray(m.series)&&m.series.length===2&&m.series.every(Number.isInteger)&&m.series.some(n=>n>0);
+    const label=[m.map||'Map offen',hasSeries?'Maps '+fmt(m.series):'',hasRounds?'':'Rundenscore offen'].filter(Boolean).join(' · ');
+    card.append(board,node('div',label,'map'));list.append(card);
   }
 }
 async function update(){
@@ -51,7 +51,8 @@ async function update(){
     const sorted=lastMatches.map(m=>byId.get(m.id)).filter(Boolean);
     for(const m of data.matches)if(!sorted.some(x=>x.id===m.id))sorted.push(m);
     lastMatches=sorted;lastGood=Date.now();render(sorted);
-    $('state').textContent=sorted.length+' LIVE'+(data.errors?.length?' · TEILFEHLER':'')+' · '+new Date(stamp).toLocaleTimeString('de-DE',{timeZone:'Europe/Berlin'});
+    $('state').textContent=data.errors?.length?'Teilweise Daten fehlen':'';
+    $('matches').title='Letzter Abruf: '+new Date(stamp).toLocaleTimeString('de-DE',{timeZone:'Europe/Berlin'});
   }catch(e){
     console.error(e);$('state').textContent='DATENFEHLER'+(lastGood&&Date.now()-lastGood<60000?' · VERALTET':'');
     if(!lastGood||Date.now()-lastGood>=60000){$('matches').replaceChildren(node('div','Datenabruf fehlgeschlagen: '+e.message,'empty'));}
